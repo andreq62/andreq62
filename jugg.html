@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kalkulator Super</title>
+  <style>
+    :root {
+      --bg-light: #f0f8ff;
+      --bg-dark: #1e1e2f;
+      --card-light: #ffffff;
+      --card-dark: #2c2c3a;
+      --text-light: #000000;
+      --text-dark: #ffffff;
+      --accent: #4fc3f7;
+      --button-dark: #424250;
+    }
+
+    body {
+      margin: 0;
+      padding: 10px;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      transition: 0.3s;
+      box-sizing: border-box;
+    }
+
+    body.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    .calculator {
+      background-color: var(--card-light);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 360px;
+      transition: 0.3s;
+      box-sizing: border-box;
+    }
+
+    body.dark .calculator {
+      background-color: var(--card-dark);
+    }
+
+    .title {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: var(--accent);
+    }
+
+    #display {
+      width: 100%;
+      height: 60px;
+      font-size: 1.6rem;
+      padding: 12px;
+      border-radius: 10px;
+      border: 2px solid var(--accent);
+      background-color: #e1f5fe;
+      text-align: right;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      font-size: 1.2rem;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .number { background-color: var(--accent); }
+    .operator { background-color: #ffb74d; }
+    .equal { background-color: #66bb6a; }
+    .clear { background-color: #ef5350; }
+    .backspace { background-color: #9e9e9e; }
+    .darkmode { background-color: var(--button-dark); }
+
+    button:hover {
+      filter: brightness(1.15);
+    }
+
+    #history {
+      font-size: 0.85rem;
+      margin-top: 12px;
+      background: rgba(0, 0, 0, 0.05);
+      padding: 8px;
+      border-radius: 10px;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+
+    body.dark #display {
+      background-color: #333344;
+      color: #fff;
+    }
+
+    body.dark #history {
+      background-color: #333;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="title">Andri,ali</div>
+    <input type="text" id="display" disabled placeholder="0" />
+    <div class="buttons">
+      <button class="clear" onclick="clearDisplay()">C</button>
+      <button class="backspace" onclick="backspace()">←</button>
+      <button class="darkmode" onclick="toggleDarkMode()">☾</button>
+      <button class="operator" onclick="appendValue('÷')">÷</button>
+
+      <button class="number" onclick="appendValue('7')">7</button>
+      <button class="number" onclick="appendValue('8')">8</button>
+      <button class="number" onclick="appendValue('9')">9</button>
+      <button class="operator" onclick="appendValue('×')">×</button>
+
+      <button class="number" onclick="appendValue('4')">4</button>
+      <button class="number" onclick="appendValue('5')">5</button>
+      <button class="number" onclick="appendValue('6')">6</button>
+      <button class="operator" onclick="appendValue('-')">−</button>
+
+      <button class="number" onclick="appendValue('1')">1</button>
+      <button class="number" onclick="appendValue('2')">2</button>
+      <button class="number" onclick="appendValue('3')">3</button>
+      <button class="operator" onclick="appendValue('+')">+</button>
+
+      <button class="number" onclick="appendValue('0')">0</button>
+      <button class="number" onclick="appendValue('000')">000</button>
+      <button class="number" onclick="appendValue('.')">.</button>
+      <button class="equal" onclick="calculate()">=</button>
+      <button class="clear" onclick="clearHistory()">Hapus Riwayat</button>
+    </div>
+    <div id="history"></div>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+    const history = document.getElementById("history");
+
+    function appendValue(value) {
+      if (display.value.length < 100) {
+        display.value += value;
+      }
+    }
+
+    function clearDisplay() {
+      display.value = "";
+    }
+
+    function backspace() {
+      display.value = display.value.slice(0, -1);
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    function clearHistory() {
+      history.innerHTML = "";
+    }
+
+    function calculate() {
+      try {
+        let expression = display.value
+          .replace(/×/g, "*")
+          .replace(/−/g, "-")
+          .replace(/%/g, "*0.01");
+
+        if (!/^[\d+\-*/().\sMathsqrt]*$/.test(expression)) {
+          display.value = "Input tidak valid";
+          return;
+        }
+
+        const result = Function('"use strict";return (' + expression + ')')();
+        if (isFinite(result)) {
+          const formatted = result.toLocaleString('id-ID');
+          history.innerHTML += `<div>${display.value} = ${formatted}</div>`;
+          display.value = formatted;
+        } else {
+          display.value = "Hasil tidak valid";
+        }
+      } catch {
+        display.value = "Error";
+      }
+    }
+  </script>
+</body>
+</html>
